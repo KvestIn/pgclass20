@@ -1,0 +1,6 @@
+production:
+  databases:
+    frag:
+      url: postgres://postgres@db:5432/frag
+    bsp:
+      url: postgres://postgres@db:5432/bsp

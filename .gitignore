@@ -1,0 +1,16 @@
+.DS_Store
+.vagrant/
+*.pem
+.env
+*.log
+*.tar.gz
+db/
+docs/~\$README\.md
+*.exe
+build/ir
+
+dts
+*.tar
+
+temp
+

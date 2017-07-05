@@ -1,0 +1,68 @@
+version: '2'
+services:
+  db:
+    environment:
+      - ROOT=/srv/main
+      - LOGSROOT=/srv/extension
+      - V8SYSTEMSPACE=/srv/second
+      - PGMAJOR=9.6
+      - PROJECT="pgsteroids"
+      - USERNAME="vasya"
+      - USERPASSW="123456"
+      - FULLPATH=/srv/main/vasya/pgsteroids
+      - FULLPATHLOGS=/srv/extension/vasya/pgsteroids
+    build: 
+      context: postgres
+      dockerfile: Dockerfile.96
+    image: onec/postgres:9.6
+    ports:
+      - 5432:5432
+    volumes:
+      - /srv/main/vasya/pgsteroids/postgres/:/var/lib/postgresql/data
+      - /srv/extension/vasya/pgsteroids/pglog/:/var/log/postgresql
+      - /srv/second/v8space/:/data/v8systemspace
+      - /srv/temp/vasya/pgsteroids:/srv/temp_table_spc
+  pgadmin:
+    image: chorss/docker-pgadmin4:latest
+    ports:
+      - 5050:5050
+    links:
+      - db:postgres
+  powa:
+    build: 
+      context: powa-web
+    image: onec/powa-web:latest
+    ports:
+      - 8888:8888
+    links:
+      - db:db
+  pghero:
+    build:
+      context: pghero
+    image:  ones/pghero
+    ports:
+      - 3001:3001
+  barman:
+    image: tbeadle/barman:2.1
+    build: ./barman
+    depends_on:
+      - db
+    volumes:
+      # Barman configs
+      - ./barman/barman:/etc/barman:ro
+      # cron job for taking weekly basebackups
+      - ./barman/private/cron.d/basebackups:/etc/cron.d/basebackups:ro
+      # The right side of this mount should be set to BARMAN_DATA_DIR.
+      - /var/lib/barman/barman/home:/var/lib/barman
+      # The right side of this mount should be set to BARMAN_LOG_DIR.
+      - /var/lib/barman/barman/logs:/var/log/barman
+      - ./barman/private/barman:/private:ro
+
+  # pg:
+  #   image: tbeadle/postgres:9.5-barman
+  #   environment:
+  #     BARMAN_PASSWORD: iamsosecretive
+  #     STREAMING_PASSWORD: youwillneverguessme
+  #   volumes:
+  #     - /var/lib/barman/pg:/var/lib/postgresql/data
+  #     - ./private/pg:/private:ro

@@ -1,0 +1,11 @@
+alter system set shared_buffers = '256MB';
+alter system set work_mem = '10MB';
+alter system set maintenance_work_mem = '40MB';
+alter system set effective_cache_size = '1024MB';
+alter system set effective_io_concurrency = 1;
+alter system set random_page_cost = '3';
+alter system set autovacuum = 'on';
+alter system set autovacuum_max_workers = '4';
+alter system set synchronous_commit = 'off';
+alter system set full_page_writes = 'off';
+SELECT pg_reload_conf();
